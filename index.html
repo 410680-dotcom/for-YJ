@@ -1,0 +1,1197 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>❤️ 專屬我們的甜蜜集點卡 - Sweet Stamps</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Canvas Confetti for Celebration Effect -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <!-- Google Fonts: Zen Maru Gothic & Noto Serif TC -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@500;700&family=Zen+Maru+Gothic:wght@400;500;700;900&display=swap" rel="stylesheet">
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            creampaper: '#FAF6F0',
+            dustypink: '#E8B4B8',
+            rosered: '#C85A6B',
+            softblush: '#F4DFE1',
+            cozybrown: '#5C4A42',
+            sandbrown: '#8C7A70',
+            stamppink: '#D96B7B',
+            penaltygray: '#736B69',
+            penaltyred: '#B83B5E'
+          },
+          fontFamily: {
+            serif: ['"Noto Serif TC"', 'serif'],
+            sans: ['"Zen Maru Gothic"', 'sans-serif'],
+          },
+          boxShadow: {
+            'paper': '0 12px 35px -8px rgba(92, 74, 66, 0.12), 0 4px 12px -2px rgba(92, 74, 66, 0.05)',
+            'stamp': '0 4px 12px rgba(217, 107, 123, 0.3)',
+          }
+        }
+      }
+    }
+  </script>
+
+  <style>
+    /* 質感紙張背景紋理 */
+    body {
+      background-color: #F5EFEB;
+      background-image: radial-gradient(#E2D7CF 1.2px, transparent 1.2px);
+      background-size: 20px 20px;
+      font-family: 'Zen Maru Gothic', sans-serif;
+      color: #5C4A42;
+      overflow-x: hidden;
+    }
+
+    /* 手作紙質感卡片 */
+    .paper-card {
+      background-color: #FAF6F0;
+      border: 1.5px solid rgba(220, 205, 195, 0.8);
+      box-shadow: 0 10px 30px rgba(92, 74, 66, 0.08);
+      position: relative;
+    }
+
+    /* 愛心蓋章動畫 */
+    @keyframes stampDrop {
+      0% { opacity: 0; transform: scale(3.5) rotate(-20deg); }
+      50% { opacity: 0.9; transform: scale(0.85) rotate(-5deg); }
+      75% { transform: scale(1.1) rotate(-8deg); }
+      100% { opacity: 1; transform: scale(1) rotate(-6deg); }
+    }
+
+    .animate-stamp-drop {
+      animation: stampDrop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    /* 格子 Hover 微懸浮 */
+    .stamp-slot {
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .stamp-slot:hover {
+      transform: translateY(-2px) scale(1.02);
+    }
+
+    /* 自訂捲軸 */
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+    ::-webkit-scrollbar-track {
+      background: #F5EFEB;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #E8B4B8;
+      border-radius: 4px;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+      background: #C85A6B;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-3 sm:p-6 md:p-8">
+
+  <div class="max-w-2xl mx-auto w-full">
+    
+    <!-- 頂部頁頭 -->
+    <header class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-3 pb-4 border-b border-sandbrown/20">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-2xl bg-dustypink/30 text-rosered flex items-center justify-center font-serif text-2xl shadow-sm">
+          <i class="fa-solid fa-heart animate-pulse"></i>
+        </div>
+        <div>
+          <h1 class="font-serif text-xl sm:text-2xl font-bold tracking-wide text-cozybrown flex items-center gap-2" id="uiStoreTitle">
+            ❤️ 專屬我們的甜蜜集點卡
+          </h1>
+          <p class="text-xs text-sandbrown font-serif italic mt-0.5" id="uiStoreSubtitle">
+            「獎勵甜蜜放閃，警告溫柔提醒。」
+          </p>
+        </div>
+      </div>
+
+      <!-- 身份模式切換 -->
+      <div class="flex items-center gap-1.5 bg-dustypink/20 p-1.5 rounded-2xl text-xs font-medium border border-dustypink/30">
+        <button id="btnGFMode" onclick="switchToGFMode()" class="px-3.5 py-1.5 rounded-xl transition-all duration-200 flex items-center gap-1.5 bg-creampaper text-cozybrown font-bold shadow-sm">
+          <i class="fa-solid fa-crown text-rosered"></i> 親愛的 (女朋友)
+        </button>
+        <button id="btnBFMode" onclick="openBFAuthModal()" class="px-3.5 py-1.5 rounded-xl transition-all duration-200 text-sandbrown hover:text-cozybrown flex items-center gap-1.5">
+          <i class="fa-solid fa-user-gear"></i> 男朋友 (店長)
+        </button>
+      </div>
+    </header>
+
+    <!-- 男朋友管理提示橫幅 -->
+    <div id="bfNoticeBar" class="hidden mb-5 p-3.5 bg-softblush border border-dustypink/60 rounded-2xl flex justify-between items-center text-xs text-rosered shadow-sm">
+      <span class="flex items-center gap-2 font-medium">
+        <i class="fa-solid fa-shield-heart text-sm"></i>
+        目前為【男朋友 / 店長管理模式】，可進行加分、扣分、修改條款與重置設定。
+      </span>
+      <button onclick="switchToGFMode()" class="underline font-bold hover:text-cozybrown">退出管理</button>
+    </div>
+
+    <!-- 主集點卡區塊 -->
+    <main class="space-y-6">
+      
+      <!-- 1. 甜蜜加分集點卡 (Reward Card) -->
+      <div class="paper-card rounded-3xl p-5 sm:p-8 relative overflow-hidden shadow-paper">
+        <div class="absolute -top-6 -right-6 w-28 h-28 bg-dustypink/20 rounded-full pointer-events-none blur-xl"></div>
+        <div class="absolute -bottom-6 -left-6 w-28 h-28 bg-softblush rounded-full pointer-events-none blur-xl"></div>
+
+        <div class="flex justify-between items-start mb-4 relative z-10">
+          <div>
+            <span class="inline-block text-[11px] font-bold px-3 py-1 rounded-full bg-dustypink/30 text-rosered mb-1 font-mono tracking-wider">
+              💖 SWEET REWARD STAMPS
+            </span>
+            <h2 class="text-lg sm:text-xl font-bold font-serif text-cozybrown" id="uiHolderLabel">
+              寶貝專屬 VIP 甜蜜加分卡
+            </h2>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-sandbrown block font-serif">加分進度</span>
+            <span class="font-serif font-bold text-2xl sm:text-3xl text-rosered">
+              <span id="uiCurrentPoints">0</span> <span class="text-xs font-sans text-sandbrown">/ <span id="uiMaxPoints">10</span> 點</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- 加分印章格子網格 -->
+        <div id="stampGrid" class="grid grid-cols-5 gap-3 sm:gap-4 my-5 relative z-10">
+          <!-- JS 動態生成加分印章格 -->
+        </div>
+
+        <!-- 滿點兌換提示 -->
+        <div id="rewardAlert" class="hidden my-4 p-4 bg-softblush border border-stamppink/40 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-3 text-stamppink shadow-sm">
+          <div class="flex items-center gap-3">
+            <div class="text-2xl animate-bounce"><i class="fa-solid fa-gift"></i></div>
+            <div>
+              <p class="font-bold text-sm">恭喜寶貝！加分集點目標已達成！</p>
+              <p class="text-xs opacity-90" id="uiRewardAlertDesc">快找男朋友領取專屬獎勵吧 ❤️</p>
+            </div>
+          </div>
+          <button id="btnClaimReward" onclick="triggerRedeemModal()" class="w-full sm:w-auto px-5 py-2.5 bg-stamppink text-white text-xs font-bold rounded-xl shadow-stamp hover:bg-rosered transition active:scale-95">
+            兌換獎勵券
+          </button>
+        </div>
+
+        <!-- 男朋友專用：快速加分操作列 -->
+        <div id="bfControls" class="hidden mt-5 pt-4 border-t border-sandbrown/20 bg-dustypink/10 -mx-5 sm:-mx-8 -mb-5 sm:-mb-8 p-5 sm:p-8 rounded-b-3xl">
+          <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2 w-full sm:w-auto">
+              <span class="text-xs font-bold text-cozybrown whitespace-nowrap"><i class="fa-solid fa-wand-magic-sparkles text-rosered"></i> 甜蜜加分：</span>
+              <button onclick="changePoints(1, '男朋友蓋章加 1 點')" class="w-10 h-10 rounded-xl bg-stamppink text-white font-bold hover:bg-rosered transition active:scale-95 shadow-sm text-sm flex items-center justify-center">
+                +1
+              </button>
+              <button onclick="changePoints(3, '男朋友特許加 3 點')" class="px-3 h-10 rounded-xl bg-rosered text-white font-bold hover:bg-cozybrown transition active:scale-95 shadow-sm text-xs flex items-center justify-center">
+                +3 點
+              </button>
+              <button onclick="changePoints(-1, '手動微調加分 -1')" class="w-10 h-10 rounded-xl bg-creampaper border border-sandbrown/30 text-cozybrown hover:bg-sandbrown/20 transition active:scale-95 text-xs font-bold">
+                -1
+              </button>
+            </div>
+
+            <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+              <button onclick="openCustomPointModal('add')" class="px-3.5 py-2.5 rounded-xl bg-creampaper border border-sandbrown/30 text-xs font-medium text-cozybrown hover:bg-creampaper/80">
+                指定加分數值
+              </button>
+              <button onclick="openCardSettingsModal()" class="px-3.5 py-2.5 rounded-xl bg-cozybrown text-creampaper text-xs font-bold hover:bg-cozybrown/90 transition shadow-sm">
+                <i class="fa-solid fa-sliders"></i> 全局設定與密碼
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. 犯錯扣分/警告紀錄卡 (Penalty Card) -->
+      <div class="paper-card rounded-3xl p-5 sm:p-7 relative overflow-hidden shadow-paper border-penaltyred/30">
+        <div class="flex justify-between items-start mb-3">
+          <div>
+            <span class="inline-block text-[11px] font-bold px-3 py-1 rounded-full bg-penaltyred/10 text-penaltyred mb-1 font-mono tracking-wider">
+              💔 PENALTY & WARNING COUNTER
+            </span>
+            <h3 class="text-base sm:text-lg font-bold font-serif text-cozybrown">
+              犯錯扣分 / 警告印章卡
+            </h3>
+          </div>
+          <div class="text-right">
+            <span class="text-xs text-sandbrown block font-serif">目前扣分點數</span>
+            <span class="font-serif font-bold text-2xl sm:text-3xl text-penaltyred">
+              <span id="uiPenaltyPoints">0</span> <span class="text-xs font-sans text-sandbrown">/ <span id="uiMaxPenalty">5</span> 次</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- 扣分印章網格 -->
+        <div id="penaltyGrid" class="grid grid-cols-5 gap-3 my-4">
+          <!-- JS 動態生成扣分印章格 -->
+        </div>
+
+        <!-- 男朋友專用：扣分/懲罰操作列 -->
+        <div id="bfPenaltyControls" class="hidden mt-4 pt-3 border-t border-sandbrown/20 flex flex-col sm:flex-row justify-between items-center gap-3">
+          <div class="flex items-center gap-2 w-full sm:w-auto">
+            <span class="text-xs font-bold text-penaltyred whitespace-nowrap"><i class="fa-solid fa-heart-crack"></i> 執行扣分/警告：</span>
+            <button onclick="changePenaltyPoints(1, '男朋友登記扣分/警告 1 次')" class="px-3.5 h-9 rounded-xl bg-penaltyred text-white font-bold hover:bg-cozybrown transition active:scale-95 text-xs flex items-center justify-center shadow-sm">
+              +1 扣分
+            </button>
+            <button onclick="changePenaltyPoints(-1, '取消一次扣分/懲罰完成')" class="px-3 h-9 rounded-xl bg-creampaper border border-sandbrown/30 text-cozybrown hover:bg-sandbrown/20 transition active:scale-95 text-xs font-bold">
+              -1 扣分
+            </button>
+          </div>
+          <button onclick="openCustomPointModal('penalty')" class="px-3.5 py-2 rounded-xl bg-creampaper border border-sandbrown/30 text-xs font-medium text-cozybrown hover:bg-creampaper/80 w-full sm:w-auto">
+            指定扣分數值
+          </button>
+        </div>
+      </div>
+
+      <!-- 獲點條件、扣分條款與獎勵清單 (三欄式或雙欄) -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+        
+        <!-- 放閃獲點條件 -->
+        <div class="paper-card rounded-2xl p-5 shadow-paper">
+          <div class="flex justify-between items-center mb-3 pb-2 border-b border-sandbrown/20">
+            <h3 class="font-serif font-bold text-cozybrown text-sm flex items-center gap-2">
+              <i class="fa-solid fa-heart-circle-plus text-rosered"></i> 放閃加分條件
+            </h3>
+            <button id="btnEditConditions" onclick="openCardSettingsModal()" class="hidden text-xs text-rosered hover:underline">
+              <i class="fa-solid fa-pen"></i> 編輯
+            </button>
+          </div>
+          <ul id="uiConditionsList" class="space-y-2 text-xs text-cozybrown/90 leading-relaxed">
+            <!-- JS 動態帶入 -->
+          </ul>
+        </div>
+
+        <!-- 犯錯扣分條款 -->
+        <div class="paper-card rounded-2xl p-5 shadow-paper">
+          <div class="flex justify-between items-center mb-3 pb-2 border-b border-sandbrown/20">
+            <h3 class="font-serif font-bold text-cozybrown text-sm flex items-center gap-2">
+              <i class="fa-solid fa-triangle-exclamation text-penaltyred"></i> 犯錯扣分警告規則
+            </h3>
+            <button id="btnEditPenalties" onclick="openCardSettingsModal()" class="hidden text-xs text-rosered hover:underline">
+              <i class="fa-solid fa-pen"></i> 編輯
+            </button>
+          </div>
+          <ul id="uiPenaltiesList" class="space-y-2 text-xs text-cozybrown/90 leading-relaxed">
+            <!-- JS 動態帶入 -->
+          </ul>
+        </div>
+
+        <!-- 甜蜜獎勵內容 -->
+        <div class="paper-card rounded-2xl p-5 shadow-paper">
+          <div class="flex justify-between items-center mb-3 pb-2 border-b border-sandbrown/20">
+            <h3 class="font-serif font-bold text-cozybrown text-sm flex items-center gap-2">
+              <i class="fa-solid fa-gift text-rosered"></i> 甜蜜獎勵兌換清單
+            </h3>
+            <button id="btnEditRewards" onclick="openCardSettingsModal()" class="hidden text-xs text-rosered hover:underline">
+              <i class="fa-solid fa-pen"></i> 編輯
+            </button>
+          </div>
+          <ul id="uiRewardsList" class="space-y-2 text-xs text-cozybrown/90 leading-relaxed">
+            <!-- JS 動態帶入 -->
+          </ul>
+        </div>
+
+      </div>
+
+      <!-- 歷程紀錄頁籤 (加分紀錄 / 扣分紀錄 / 兌換紀錄) -->
+      <div class="paper-card rounded-2xl p-5 shadow-paper">
+        <div class="flex justify-between items-center mb-4 pb-3 border-b border-sandbrown/20">
+          <div class="flex gap-3 sm:gap-5">
+            <button id="tabPoints" onclick="switchLogTab('points')" class="font-serif font-bold text-xs sm:text-sm text-rosered pb-1 border-b-2 border-rosered transition">
+              <i class="fa-solid fa-heart"></i> 放閃加分紀錄
+            </button>
+            <button id="tabPenalties" onclick="switchLogTab('penalties')" class="font-serif font-bold text-xs sm:text-sm text-sandbrown hover:text-cozybrown pb-1 border-b-2 border-transparent transition">
+              <i class="fa-solid fa-heart-crack"></i> 犯錯扣分紀錄
+            </button>
+            <button id="tabRedeems" onclick="switchLogTab('redeems')" class="font-serif font-bold text-xs sm:text-sm text-sandbrown hover:text-cozybrown pb-1 border-b-2 border-transparent transition">
+              <i class="fa-solid fa-ticket"></i> 獎勵兌換紀錄
+            </button>
+          </div>
+          <span class="text-[11px] text-sandbrown" id="uiLogCount">共 0 筆</span>
+        </div>
+
+        <!-- 1. 加分紀錄清單 -->
+        <div id="pointLogsBox" class="max-h-56 overflow-y-auto pr-1 space-y-2.5">
+          <!-- JS 動態渲染 -->
+        </div>
+
+        <!-- 2. 扣分紀錄清單 -->
+        <div id="penaltyLogsBox" class="hidden max-h-56 overflow-y-auto pr-1 space-y-2.5">
+          <!-- JS 動態渲染 -->
+        </div>
+
+        <!-- 3. 兌換紀錄清單 -->
+        <div id="redeemLogsBox" class="hidden max-h-56 overflow-y-auto pr-1 space-y-2.5">
+          <!-- JS 動態渲染 -->
+        </div>
+      </div>
+
+    </main>
+
+    <footer class="mt-8 pt-4 border-t border-sandbrown/20 text-center text-xs text-sandbrown font-serif flex justify-between items-center">
+      <p>❤️ Created with love for us • 紀錄屬於我們的日常甜蜜與溫柔</p>
+      <button id="btnResetData" onclick="confirmResetAll()" class="hidden text-rosered/60 hover:text-rosered hover:underline text-[11px]">
+        [店長] 重置所有資料
+      </button>
+    </footer>
+
+  </div>
+
+  <!-- MODAL 1: 男朋友身份驗證 PIN Modal -->
+  <div id="bfAuthModal" class="fixed inset-0 bg-cozybrown/40 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="paper-card max-w-xs w-full rounded-2xl p-6 shadow-2xl relative">
+      <button onclick="closeModal('bfAuthModal')" class="absolute top-4 right-4 text-sandbrown hover:text-cozybrown">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+      <div class="text-center mb-4">
+        <div class="w-12 h-12 bg-softblush text-rosered rounded-full flex items-center justify-center mx-auto mb-2 text-xl">
+          <i class="fa-solid fa-key"></i>
+        </div>
+        <h3 class="font-serif font-bold text-cozybrown text-lg">店長/男朋友 驗證</h3>
+        <p class="text-xs text-sandbrown mt-1">請輸入您的店長解鎖密碼</p>
+      </div>
+      <form onsubmit="handleBFLogin(event)" class="space-y-4">
+        <div>
+          <input type="password" id="bfPinInput" placeholder="請輸入密碼" 
+            class="w-full text-center tracking-widest text-lg font-mono py-2.5 bg-creampaper border border-sandbrown/30 rounded-xl focus:outline-none focus:border-rosered text-cozybrown">
+          <p id="pinErrorMsg" class="text-[11px] text-rosered text-center mt-1.5 hidden">密碼錯誤！預設密碼為 5200</p>
+        </div>
+        <button type="submit" class="w-full py-2.5 bg-cozybrown text-creampaper text-xs font-bold rounded-xl hover:bg-cozybrown/90 transition shadow-sm">
+          解鎖店長管理權限
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL 2: 集點卡與密碼詳細設定 Modal -->
+  <div id="cardSettingsModal" class="fixed inset-0 bg-cozybrown/40 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="paper-card max-w-md w-full rounded-2xl p-6 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <button onclick="closeModal('cardSettingsModal')" class="absolute top-4 right-4 text-sandbrown hover:text-cozybrown">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+      
+      <h3 class="font-serif font-bold text-cozybrown text-lg mb-4 pb-2 border-b border-sandbrown/20 flex items-center gap-2">
+        <i class="fa-solid fa-heart-circle-bolt text-rosered"></i> 全局集點卡與密碼設定
+      </h3>
+
+      <div class="space-y-4 text-xs text-cozybrown">
+        <div>
+          <label class="block font-bold mb-1">集點卡主標題</label>
+          <input type="text" id="settingTitle" class="w-full p-2.5 bg-creampaper border border-sandbrown/30 rounded-xl text-xs focus:outline-none focus:border-rosered">
+        </div>
+
+        <div>
+          <label class="block font-bold mb-1">副標題 / 放閃宣言</label>
+          <input type="text" id="settingSubtitle" class="w-full p-2.5 bg-creampaper border border-sandbrown/30 rounded-xl text-xs focus:outline-none focus:border-rosered">
+        </div>
+
+        <div>
+          <label class="block font-bold mb-1">加分卡目標上限 (加分印章格數)</label>
+          <select id="settingMaxPoints" class="w-full p-2.5 bg-creampaper border border-sandbrown/30 rounded-xl text-xs focus:outline-none focus:border-rosered font-bold">
+            <option value="5">5 點</option>
+            <option value="10">10 點 (推薦)</option>
+            <option value="12">12 點</option>
+            <option value="15">15 點</option>
+            <option value="20">20 點</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold mb-1">扣分卡警告上限 (扣分印章格數)</label>
+          <select id="settingMaxPenalty" class="w-full p-2.5 bg-creampaper border border-sandbrown/30 rounded-xl text-xs focus:outline-none focus:border-rosered font-bold">
+            <option value="3">3 次</option>
+            <option value="5">5 次 (標準)</option>
+            <option value="10">10 次</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold mb-1">放閃加分條件 (每行一項)</label>
+          <textarea id="settingConditions" rows="3" class="w-full p-2.5 bg-creampaper border border-sandbrown/30 rounded-xl text-xs focus:outline-none focus:border-rosered leading-relaxed"></textarea>
+        </div>
+
+        <div>
+          <label class="block font-bold mb-1">犯錯扣分/警告規則 (每行一項)</label>
+          <textarea id="settingPenalties" rows="3" class="w-full p-2.5 bg-creampaper border border-sandbrown/30 rounded-xl text-xs focus:outline-none focus:border-rosered leading-relaxed"></textarea>
+        </div>
+
+        <div>
+          <label class="block font-bold mb-1">甜蜜獎勵清單 (每行一項)</label>
+          <textarea id="settingRewards" rows="3" class="w-full p-2.5 bg-creampaper border border-sandbrown/30 rounded-xl text-xs focus:outline-none focus:border-rosered leading-relaxed"></textarea>
+        </div>
+
+        <div class="p-3 bg-softblush/50 border border-dustypink/50 rounded-xl">
+          <label class="block font-bold text-rosered mb-1"><i class="fa-solid fa-lock"></i> 修改店長管理密碼</label>
+          <input type="text" id="settingAdminPin" placeholder="請輸入新密碼" class="w-full p-2.5 bg-creampaper border border-sandbrown/30 rounded-xl text-xs font-mono focus:outline-none focus:border-rosered">
+          <p class="text-[10px] text-sandbrown mt-1">修改密碼後會同步儲存至瀏覽器，下次使用即生效。</p>
+        </div>
+      </div>
+
+      <div class="mt-6 flex gap-2">
+        <button onclick="saveCardSettings()" class="flex-1 py-2.5 bg-rosered text-white text-xs font-bold rounded-xl hover:bg-stamppink transition shadow-sm">
+          儲存變更
+        </button>
+        <button onclick="closeModal('cardSettingsModal')" class="px-4 py-2.5 bg-dustypink/30 text-cozybrown text-xs font-medium rounded-xl hover:bg-dustypink/50">
+          取消
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: 男朋友手動指定加分/扣分 Modal -->
+  <div id="customPointModal" class="fixed inset-0 bg-cozybrown/40 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="paper-card max-w-xs w-full rounded-2xl p-6 shadow-2xl relative">
+      <button onclick="closeModal('customPointModal')" class="absolute top-4 right-4 text-sandbrown hover:text-cozybrown">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+      <h3 class="font-serif font-bold text-cozybrown text-base mb-3" id="customPointModalTitle">直接指定數值</h3>
+      <div class="space-y-3">
+        <div>
+          <label class="text-xs text-sandbrown block mb-1">調整後數值：</label>
+          <input type="number" id="customPointInput" min="0" max="50" class="w-full p-2 bg-creampaper border border-sandbrown/30 rounded-xl text-center font-bold text-lg text-cozybrown">
+        </div>
+        <div>
+          <label class="text-xs text-sandbrown block mb-1">事由 / 備註：</label>
+          <input type="text" id="customPointNote" placeholder="例如：特別犒賞寶貝、特別懲罰事項" class="w-full p-2 bg-creampaper border border-sandbrown/30 rounded-xl text-xs text-cozybrown">
+        </div>
+        <button onclick="submitCustomPoints()" class="w-full py-2.5 bg-cozybrown text-creampaper text-xs font-bold rounded-xl hover:bg-cozybrown/90 transition shadow-sm">
+          確認送出
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 4: 獎勵兌換 Modal -->
+  <div id="redeemModal" class="fixed inset-0 bg-cozybrown/40 backdrop-blur-sm hidden items-center justify-center p-4 z-50">
+    <div class="paper-card max-w-sm w-full rounded-2xl p-6 shadow-2xl relative">
+      <button onclick="closeModal('redeemModal')" class="absolute top-4 right-4 text-sandbrown hover:text-cozybrown">
+        <i class="fa-solid fa-xmark text-lg"></i>
+      </button>
+      <div class="text-center mb-4">
+        <div class="w-12 h-12 bg-softblush text-rosered rounded-full flex items-center justify-center mx-auto mb-2 text-xl">
+          <i class="fa-solid fa-gift"></i>
+        </div>
+        <h3 class="font-serif font-bold text-cozybrown text-lg">兌換甜蜜獎勵</h3>
+        <p class="text-xs text-sandbrown mt-1">請選擇寶貝要兌換的獎勵項目，將扣除加分點數喔！</p>
+      </div>
+
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block font-bold text-cozybrown mb-1">選擇獎勵項目：</label>
+          <select id="redeemSelect" class="w-full p-2.5 bg-creampaper border border-sandbrown/30 rounded-xl text-cozybrown text-xs focus:outline-none focus:border-rosered">
+            <!-- JS 動態產生選項 -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block font-bold text-cozybrown mb-1">需扣除加分點數：</label>
+          <input type="number" id="redeemCostInput" min="1" class="w-full p-2 bg-creampaper border border-sandbrown/30 rounded-xl text-xs font-bold text-cozybrown">
+        </div>
+
+        <div>
+          <label class="block font-bold text-cozybrown mb-1">兌換備註 / 給男朋友的話：</label>
+          <input type="text" id="redeemNoteInput" placeholder="例如：今晚就要兌換這個！" class="w-full p-2 bg-creampaper border border-sandbrown/30 rounded-xl text-xs text-cozybrown">
+        </div>
+      </div>
+
+      <div class="mt-5 flex gap-2">
+        <button onclick="processRedeem()" class="flex-1 py-2.5 bg-stamppink text-white text-xs font-bold rounded-xl hover:bg-rosered transition shadow-stamp">
+          確認兌換並扣點
+        </button>
+        <button onclick="closeModal('redeemModal')" class="px-4 py-2.5 bg-dustypink/30 text-cozybrown text-xs font-medium rounded-xl hover:bg-dustypink/50">
+          取消
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // 預設情侶雙軌資料 (加分 + 扣分條款)
+    const DEFAULT_DATA = {
+      storeTitle: "❤️ 專屬我們的甜蜜集點卡",
+      storeSubtitle: "「獎勵甜蜜放閃，警告溫柔提醒。」",
+      holderLabel: "寶貝專屬 VIP 甜蜜加分卡",
+      currentPoints: 3,
+      maxPoints: 10,
+      penaltyPoints: 1,
+      maxPenalty: 5,
+      adminPin: "5200", // 預設密碼
+      conditions: [
+        "陪男朋友看他想看的電影或比賽 (+1點)",
+        "主動給寶貝一個超大擁抱 & 親親 (+1點)",
+        "主動幫忙分擔家務或洗碗 (+1點)",
+        "心情不好時願意說出來溝通溝通 (+1點)",
+        "陪男朋友一起吃宵夜喝奶茶 (+1點)"
+      ],
+      penalties: [
+        "不耐煩生氣或太久不回訊息 (扣1點/懲罰：買珍奶賠罪)",
+        "忘記兩人約定事項 (扣1點/懲罰：幫寶貝按摩15分鐘)",
+        "晚睡超過半夜1點 (警告1次/懲罰：隔天聽話一天)"
+      ],
+      rewards: [
+        "集滿 5 點：腳底 / 肩頸按摩 15 分鐘 💆‍♀️",
+        "集滿 10 點：大餐招待 (任選喜歡的餐廳) 🍽️",
+        "集滿 10 點：獲得「無條件原諒卡」乙張 🎫",
+        "集滿 10 點：深夜宵夜外送專人服務 🛵"
+      ],
+      pointLogs: [
+        { id: 1, time: "2026/09/16 20:30", change: 2, result: 2, note: "寶貝今天主動抱抱加放閃" },
+        { id: 2, time: "2026/09/17 19:10", change: 1, result: 3, note: "陪男朋友吃大排檔宵夜" }
+      ],
+      penaltyLogs: [
+        { id: 1, time: "2026/09/17 23:45", change: 1, result: 1, note: "晚睡超過半夜1點警告1次" }
+      ],
+      redeemLogs: []
+    };
+
+    // 應用程式狀態 State
+    let state = {};
+    let isBFMode = false; // 是否在男朋友管理模式
+    let currentTab = 'points'; // 'points', 'penalties', or 'redeems'
+    let customPointType = 'add'; // 'add' or 'penalty'
+
+    // window 初始化
+    window.onload = function() {
+      loadState();
+      renderApp();
+    };
+
+    // 載入 LocalStorage 資料 (含獨立密碼優先權)
+    function loadState() {
+      const saved = localStorage.getItem('sweet_couple_stamp_data');
+      const savedPin = localStorage.getItem('stamp_card_pin');
+
+      if (saved) {
+        try {
+          state = JSON.parse(saved);
+        } catch (e) {
+          state = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        }
+      } else {
+        state = JSON.parse(JSON.stringify(DEFAULT_DATA));
+      }
+
+      // 補齊可能缺少的新屬性
+      if (state.penaltyPoints === undefined) state.penaltyPoints = 0;
+      if (state.maxPenalty === undefined) state.maxPenalty = 5;
+      if (!state.penalties) state.penalties = DEFAULT_DATA.penalties;
+      if (!state.penaltyLogs) state.penaltyLogs = [];
+
+      // 密碼讀取優先順序：1. 獨立儲存 stamp_card_pin -> 2. state.adminPin -> 3. 預設 '5200'
+      if (savedPin) {
+        state.adminPin = savedPin;
+      } else if (!state.adminPin) {
+        state.adminPin = "5200";
+      }
+
+      saveState();
+    }
+
+    // 保存資料至 LocalStorage
+    function saveState() {
+      if (state.adminPin) {
+        localStorage.setItem('stamp_card_pin', state.adminPin);
+      }
+      localStorage.setItem('sweet_couple_stamp_data', JSON.stringify(state));
+    }
+
+    // 渲染 UI 畫面
+    function renderApp() {
+      // 文字與標題
+      document.getElementById('uiStoreTitle').innerText = state.storeTitle || "❤️ 專屬我們的甜蜜集點卡";
+      document.getElementById('uiStoreSubtitle').innerText = state.storeSubtitle || "「獎勵甜蜜放閃，警告溫柔提醒。」";
+      document.getElementById('uiHolderLabel').innerText = state.holderLabel || "寶貝專屬 VIP 甜蜜加分卡";
+      document.getElementById('uiCurrentPoints').innerText = state.currentPoints;
+      document.getElementById('uiMaxPoints').innerText = state.maxPoints;
+      document.getElementById('uiPenaltyPoints').innerText = state.penaltyPoints;
+      document.getElementById('uiMaxPenalty').innerText = state.maxPenalty;
+
+      // 權限視角控制
+      const bfNotice = document.getElementById('bfNoticeBar');
+      const bfControls = document.getElementById('bfControls');
+      const bfPenaltyControls = document.getElementById('bfPenaltyControls');
+      const btnGFMode = document.getElementById('btnGFMode');
+      const btnBFMode = document.getElementById('btnBFMode');
+      const btnEditCond = document.getElementById('btnEditConditions');
+      const btnEditPen = document.getElementById('btnEditPenalties');
+      const btnEditRew = document.getElementById('btnEditRewards');
+      const btnReset = document.getElementById('btnResetData');
+
+      if (isBFMode) {
+        bfNotice.classList.remove('hidden');
+        bfControls.classList.remove('hidden');
+        bfPenaltyControls.classList.remove('hidden');
+        btnEditCond.classList.remove('hidden');
+        btnEditPen.classList.remove('hidden');
+        btnEditRew.classList.remove('hidden');
+        btnReset.classList.remove('hidden');
+        btnBFMode.className = "px-3.5 py-1.5 rounded-xl transition-all duration-200 bg-cozybrown text-creampaper font-bold shadow-sm";
+        btnGFMode.className = "px-3.5 py-1.5 rounded-xl transition-all duration-200 text-sandbrown hover:text-cozybrown";
+      } else {
+        bfNotice.classList.add('hidden');
+        bfControls.classList.add('hidden');
+        bfPenaltyControls.classList.add('hidden');
+        btnEditCond.classList.add('hidden');
+        btnEditPen.classList.add('hidden');
+        btnEditRew.classList.add('hidden');
+        btnReset.classList.add('hidden');
+        btnGFMode.className = "px-3.5 py-1.5 rounded-xl transition-all duration-200 bg-creampaper text-cozybrown font-bold shadow-sm";
+        btnBFMode.className = "px-3.5 py-1.5 rounded-xl transition-all duration-200 text-sandbrown hover:text-cozybrown";
+      }
+
+      // 渲染印章格
+      renderAddStampGrid();
+      renderPenaltyStampGrid();
+
+      // 滿點提示 Bar
+      const rewardAlert = document.getElementById('rewardAlert');
+      if (state.currentPoints >= state.maxPoints) {
+        rewardAlert.classList.remove('hidden');
+        const mainReward = state.rewards[0] || "浪漫驚喜乙份";
+        document.getElementById('uiRewardAlertDesc').innerText = `已達成最高的 ${state.maxPoints} 點！可兌換：${mainReward}`;
+      } else if (state.currentPoints >= Math.floor(state.maxPoints / 2)) {
+        rewardAlert.classList.remove('hidden');
+        document.getElementById('uiRewardAlertDesc').innerText = `已經收集到 ${state.currentPoints} 點囉！快看看想兌換什麼獎勵 ❤️`;
+      } else {
+        rewardAlert.classList.add('hidden');
+      }
+
+      // 渲染條件、扣分與獎勵
+      renderRulesLists();
+
+      // 渲染歷程紀錄
+      renderLogs();
+    }
+
+    // 渲染甜蜜加分印章格
+    function renderAddStampGrid() {
+      const grid = document.getElementById('stampGrid');
+      grid.innerHTML = '';
+
+      for (let i = 1; i <= state.maxPoints; i++) {
+        const isStamped = i <= state.currentPoints;
+        const slot = document.createElement('div');
+        
+        slot.className = `stamp-slot aspect-square rounded-2xl flex flex-col items-center justify-center p-2 relative select-none ${
+          isStamped 
+            ? 'bg-softblush/80 border-2 border-stamppink/50 text-stamppink shadow-sm' 
+            : 'border-2 border-dashed border-sandbrown/30 bg-creampaper/60 text-sandbrown/40'
+        }`;
+
+        if (isStamped) {
+          slot.innerHTML = `
+            <div class="animate-stamp-drop flex flex-col items-center justify-center">
+              <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-full border-2 border-stamppink/80 flex items-center justify-center transform -rotate-12 bg-creampaper/40">
+                <i class="fa-solid fa-heart text-sm sm:text-base text-rosered"></i>
+              </div>
+              <span class="text-[9px] font-bold font-serif mt-1 tracking-widest text-stamppink">LOVE</span>
+            </div>
+            <span class="absolute top-1 left-2 text-[10px] font-mono text-stamppink/50 font-bold">${i}</span>
+          `;
+        } else {
+          slot.innerHTML = `
+            <div class="flex flex-col items-center justify-center opacity-50">
+              <span class="font-serif font-bold text-sm sm:text-base">${i}</span>
+            </div>
+          `;
+        }
+
+        if (isBFMode) {
+          slot.classList.add('cursor-pointer');
+          slot.title = isStamped ? `點擊取消第 ${i} 點` : `點擊蓋第 ${i} 點加分`;
+          slot.onclick = () => {
+            if (isStamped) {
+              setAddPoints(i - 1, `男朋友手動取消第 ${i} 點`);
+            } else {
+              setAddPoints(i, `男朋友給寶貝蓋第 ${i} 點加分印章`);
+            }
+          };
+        }
+
+        grid.appendChild(slot);
+      }
+    }
+
+    // 渲染犯錯扣分印章格
+    function renderPenaltyStampGrid() {
+      const grid = document.getElementById('penaltyGrid');
+      grid.innerHTML = '';
+
+      for (let i = 1; i <= state.maxPenalty; i++) {
+        const isPenalized = i <= state.penaltyPoints;
+        const slot = document.createElement('div');
+        
+        slot.className = `stamp-slot aspect-square rounded-2xl flex flex-col items-center justify-center p-2 relative select-none ${
+          isPenalized 
+            ? 'bg-penaltyred/10 border-2 border-penaltyred/60 text-penaltyred shadow-sm' 
+            : 'border-2 border-dashed border-sandbrown/25 bg-creampaper/40 text-sandbrown/30'
+        }`;
+
+        if (isPenalized) {
+          slot.innerHTML = `
+            <div class="animate-stamp-drop flex flex-col items-center justify-center">
+              <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-full border-2 border-penaltyred flex items-center justify-center transform rotate-6 bg-creampaper/40">
+                <i class="fa-solid fa-heart-crack text-sm text-penaltyred"></i>
+              </div>
+              <span class="text-[9px] font-bold font-serif mt-0.5 tracking-wider text-penaltyred">WARN</span>
+            </div>
+            <span class="absolute top-1 left-2 text-[10px] font-mono text-penaltyred/60 font-bold">${i}</span>
+          `;
+        } else {
+          slot.innerHTML = `
+            <div class="flex flex-col items-center justify-center opacity-40">
+              <span class="font-serif font-bold text-xs">${i}</span>
+            </div>
+          `;
+        }
+
+        if (isBFMode) {
+          slot.classList.add('cursor-pointer');
+          slot.title = isPenalized ? `點擊取消第 ${i} 次扣分` : `點擊登記第 ${i} 次扣分`;
+          slot.onclick = () => {
+            if (isPenalized) {
+              setPenaltyPoints(i - 1, `取消第 ${i} 次扣分/懲罰已完成`);
+            } else {
+              setPenaltyPoints(i, `登記第 ${i} 次扣分/警告`);
+            }
+          };
+        }
+
+        grid.appendChild(slot);
+      }
+    }
+
+    // 渲染條款與清單
+    function renderRulesLists() {
+      // 獲點條款
+      const condBox = document.getElementById('uiConditionsList');
+      condBox.innerHTML = state.conditions.map((item, idx) => `
+        <li class="flex items-start gap-2">
+          <span class="w-4 h-4 rounded-full bg-dustypink/40 text-rosered text-[10px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5">${idx+1}</span>
+          <span>${escapeHtml(item)}</span>
+        </li>
+      `).join('');
+
+      // 扣分條款
+      const penBox = document.getElementById('uiPenaltiesList');
+      penBox.innerHTML = state.penalties.map((item, idx) => `
+        <li class="flex items-start gap-2">
+          <span class="w-4 h-4 rounded-full bg-penaltyred/15 text-penaltyred text-[10px] flex items-center justify-center font-bold flex-shrink-0 mt-0.5">${idx+1}</span>
+          <span>${escapeHtml(item)}</span>
+        </li>
+      `).join('');
+
+      // 獎勵清單
+      const rewBox = document.getElementById('uiRewardsList');
+      rewBox.innerHTML = state.rewards.map((item) => `
+        <li class="flex items-start gap-2">
+          <i class="fa-solid fa-gift text-rosered/80 mt-1 flex-shrink-0"></i>
+          <span>${escapeHtml(item)}</span>
+        </li>
+      `).join('');
+    }
+
+    // 加分調整
+    function changePoints(delta, defaultNote = "") {
+      const target = state.currentPoints + delta;
+      if (target < 0) return;
+      if (target > state.maxPoints) {
+        alert(`已經超過設定的最大加分點數 (${state.maxPoints} 點) 囉！如需增加可至設定修改上限。`);
+        return;
+      }
+      setAddPoints(target, defaultNote);
+    }
+
+    function setAddPoints(target, note = "") {
+      const diff = target - state.currentPoints;
+      if (diff === 0) return;
+
+      const oldPoints = state.currentPoints;
+      state.currentPoints = target;
+
+      state.pointLogs.unshift({
+        id: Date.now(),
+        time: getFormattedTime(),
+        change: diff,
+        result: target,
+        note: note || (diff > 0 ? `獲得 ${diff} 點放閃加分` : `扣除 ${Math.abs(diff)} 點`)
+      });
+
+      if (target >= state.maxPoints && target > oldPoints) {
+        triggerLoveConfetti();
+      }
+
+      saveState();
+      renderApp();
+    }
+
+    // 扣分調整
+    function changePenaltyPoints(delta, defaultNote = "") {
+      const target = state.penaltyPoints + delta;
+      if (target < 0) return;
+      if (target > state.maxPenalty) {
+        alert(`已經超過設定的最高扣分警告上限 (${state.maxPenalty} 次)！`);
+        return;
+      }
+      setPenaltyPoints(target, defaultNote);
+    }
+
+    function setPenaltyPoints(target, note = "") {
+      const diff = target - state.penaltyPoints;
+      if (diff === 0) return;
+
+      state.penaltyPoints = target;
+
+      state.penaltyLogs.unshift({
+        id: Date.now(),
+        time: getFormattedTime(),
+        change: diff,
+        result: target,
+        note: note || (diff > 0 ? `增加 ${diff} 次犯錯扣分` : `減少 ${Math.abs(diff)} 次扣分`)
+      });
+
+      saveState();
+      renderApp();
+    }
+
+    // 觸發滿點慶祝愛心煙花
+    function triggerLoveConfetti() {
+      if (typeof confetti === 'function') {
+        confetti({
+          particleCount: 70,
+          spread: 80,
+          origin: { y: 0.6 },
+          colors: ['#E8B4B8', '#C85A6B', '#D96B7B', '#F4DFE1']
+        });
+      }
+    }
+
+    // 渲染歷程紀錄 (三頁籤)
+    function renderLogs() {
+      const pBox = document.getElementById('pointLogsBox');
+      const penBox = document.getElementById('penaltyLogsBox');
+      const rBox = document.getElementById('redeemLogsBox');
+      const countHint = document.getElementById('uiLogCount');
+
+      if (currentTab === 'points') {
+        pBox.classList.remove('hidden');
+        penBox.classList.add('hidden');
+        rBox.classList.add('hidden');
+        countHint.innerText = `共 ${state.pointLogs.length} 筆紀錄`;
+
+        if (state.pointLogs.length === 0) {
+          pBox.innerHTML = `<div class="text-center py-6 text-xs text-sandbrown/60">尚無放閃加分紀錄</div>`;
+          return;
+        }
+
+        pBox.innerHTML = state.pointLogs.map(log => `
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-creampaper/90 border border-sandbrown/20 text-xs">
+            <div class="flex items-center gap-2.5">
+              <span class="w-7 h-7 rounded-lg flex items-center justify-center font-bold font-mono text-xs ${
+                log.change > 0 ? 'bg-softblush text-rosered' : 'bg-cozybrown/10 text-cozybrown'
+              }">
+                ${log.change > 0 ? '+' + log.change : log.change}
+              </span>
+              <div>
+                <p class="font-medium text-cozybrown">${escapeHtml(log.note)}</p>
+                <p class="text-[10px] text-sandbrown font-mono">${log.time}</p>
+              </div>
+            </div>
+            <span class="text-[11px] font-serif text-cozybrown/70 font-bold">結餘: ${log.result} 點</span>
+          </div>
+        `).join('');
+
+      } else if (currentTab === 'penalties') {
+        pBox.classList.add('hidden');
+        penBox.classList.remove('hidden');
+        rBox.classList.add('hidden');
+        countHint.innerText = `共 ${state.penaltyLogs.length} 筆紀錄`;
+
+        if (state.penaltyLogs.length === 0) {
+          penBox.innerHTML = `<div class="text-center py-6 text-xs text-sandbrown/60">尚無犯錯扣分紀錄 (太棒了!)</div>`;
+          return;
+        }
+
+        penBox.innerHTML = state.penaltyLogs.map(log => `
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-penaltyred/5 border border-penaltyred/20 text-xs">
+            <div class="flex items-center gap-2.5">
+              <span class="w-7 h-7 rounded-lg flex items-center justify-center font-bold font-mono text-xs ${
+                log.change > 0 ? 'bg-penaltyred/20 text-penaltyred' : 'bg-sandbrown/20 text-cozybrown'
+              }">
+                ${log.change > 0 ? '+' + log.change : log.change}
+              </span>
+              <div>
+                <p class="font-medium text-cozybrown">${escapeHtml(log.note)}</p>
+                <p class="text-[10px] text-sandbrown font-mono">${log.time}</p>
+              </div>
+            </div>
+            <span class="text-[11px] font-serif text-penaltyred font-bold">目前扣分: ${log.result} 次</span>
+          </div>
+        `).join('');
+
+      } else {
+        pBox.classList.add('hidden');
+        penBox.classList.add('hidden');
+        rBox.classList.remove('hidden');
+        countHint.innerText = `共 ${state.redeemLogs.length} 筆紀錄`;
+
+        if (state.redeemLogs.length === 0) {
+          rBox.innerHTML = `<div class="text-center py-6 text-xs text-sandbrown/60">尚無獎勵兌換紀錄</div>`;
+          return;
+        }
+
+        rBox.innerHTML = state.redeemLogs.map(log => `
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-softblush/50 border border-dustypink/40 text-xs">
+            <div class="flex items-center gap-2.5">
+              <span class="w-7 h-7 rounded-lg bg-stamppink/15 text-stamppink flex items-center justify-center font-bold">
+                <i class="fa-solid fa-gift text-xs"></i>
+              </span>
+              <div>
+                <p class="font-bold text-cozybrown">${escapeHtml(log.item)}</p>
+                <p class="text-[10px] text-sandbrown font-mono">${log.time} ${log.note ? '• ' + escapeHtml(log.note) : ''}</p>
+              </div>
+            </div>
+            <span class="font-bold text-rosered text-xs">-${log.cost} 點</span>
+          </div>
+        `).join('');
+      }
+    }
+
+    // 切換頁籤
+    function switchLogTab(tab) {
+      currentTab = tab;
+      const tP = document.getElementById('tabPoints');
+      const tPen = document.getElementById('tabPenalties');
+      const tR = document.getElementById('tabRedeems');
+
+      tP.className = "font-serif font-bold text-xs sm:text-sm text-sandbrown hover:text-cozybrown pb-1 border-b-2 border-transparent transition";
+      tPen.className = "font-serif font-bold text-xs sm:text-sm text-sandbrown hover:text-cozybrown pb-1 border-b-2 border-transparent transition";
+      tR.className = "font-serif font-bold text-xs sm:text-sm text-sandbrown hover:text-cozybrown pb-1 border-b-2 border-transparent transition";
+
+      if (tab === 'points') {
+        tP.className = "font-serif font-bold text-xs sm:text-sm text-rosered pb-1 border-b-2 border-rosered transition";
+      } else if (tab === 'penalties') {
+        tPen.className = "font-serif font-bold text-xs sm:text-sm text-penaltyred pb-1 border-b-2 border-penaltyred transition";
+      } else {
+        tR.className = "font-serif font-bold text-xs sm:text-sm text-rosered pb-1 border-b-2 border-rosered transition";
+      }
+      renderLogs();
+    }
+
+    // 模式切換
+    function switchToGFMode() {
+      isBFMode = false;
+      renderApp();
+    }
+
+    function openBFAuthModal() {
+      if (isBFMode) return;
+      document.getElementById('bfPinInput').value = '';
+      document.getElementById('pinErrorMsg').classList.add('hidden');
+      document.getElementById('bfAuthModal').classList.remove('hidden');
+      document.getElementById('bfAuthModal').classList.add('flex');
+    }
+
+    function handleBFLogin(e) {
+      e.preventDefault();
+      const inputPin = document.getElementById('bfPinInput').value.trim();
+      
+      if (inputPin === state.adminPin) {
+        isBFMode = true;
+        closeModal('bfAuthModal');
+        renderApp();
+      } else {
+        document.getElementById('pinErrorMsg').classList.remove('hidden');
+      }
+    }
+
+    // 指定加分/扣分 Modal
+    function openCustomPointModal(type) {
+      customPointType = type;
+      const title = document.getElementById('customPointModalTitle');
+      const input = document.getElementById('customPointInput');
+      
+      if (type === 'add') {
+        title.innerText = "直接指定甜蜜加分點數";
+        input.value = state.currentPoints;
+      } else {
+        title.innerText = "直接指定犯錯扣分/警告次數";
+        input.value = state.penaltyPoints;
+      }
+
+      document.getElementById('customPointNote').value = '';
+      document.getElementById('customPointModal').classList.remove('hidden');
+      document.getElementById('customPointModal').classList.add('flex');
+    }
+
+    function submitCustomPoints() {
+      const val = parseInt(document.getElementById('customPointInput').value, 10);
+      const note = document.getElementById('customPointNote').value || (customPointType === 'add' ? "店長手動調整加分" : "店長手動調整扣分");
+
+      if (isNaN(val) || val < 0) {
+        alert("請輸入有效的數值！");
+        return;
+      }
+
+      if (customPointType === 'add') {
+        setAddPoints(val, note);
+      } else {
+        setPenaltyPoints(val, note);
+      }
+      closeModal('customPointModal');
+    }
+
+    // 開啟卡片與密碼設定 Modal
+    function openCardSettingsModal() {
+      if (!isBFMode) return;
+      document.getElementById('settingTitle').value = state.storeTitle;
+      document.getElementById('settingSubtitle').value = state.storeSubtitle;
+      document.getElementById('settingHolderLabel').value = state.holderLabel;
+      document.getElementById('settingMaxPoints').value = state.maxPoints;
+      document.getElementById('settingMaxPenalty').value = state.maxPenalty;
+      document.getElementById('settingConditions').value = state.conditions.join('\n');
+      document.getElementById('settingPenalties').value = state.penalties.join('\n');
+      document.getElementById('settingRewards').value = state.rewards.join('\n');
+      document.getElementById('settingAdminPin').value = state.adminPin || "5200";
+
+      document.getElementById('cardSettingsModal').classList.remove('hidden');
+      document.getElementById('cardSettingsModal').classList.add('flex');
+    }
+
+    // 儲存設定
+    function saveCardSettings() {
+      const title = document.getElementById('settingTitle').value.trim();
+      const subtitle = document.getElementById('settingSubtitle').value.trim();
+      const holderLabel = document.getElementById('settingHolderLabel').value.trim();
+      const maxP = parseInt(document.getElementById('settingMaxPoints').value, 10);
+      const maxPen = parseInt(document.getElementById('settingMaxPenalty').value, 10);
+      const conds = document.getElementById('settingConditions').value.split('\n').filter(s => s.trim() !== '');
+      const pens = document.getElementById('settingPenalties').value.split('\n').filter(s => s.trim() !== '');
+      const rews = document.getElementById('settingRewards').value.split('\n').filter(s => s.trim() !== '');
+      const newPin = document.getElementById('settingAdminPin').value.trim();
+
+      if (!title) {
+        alert("標題不能為空喔！");
+        return;
+      }
+
+      if (!newPin) {
+        alert("管理密碼不能為空！");
+        return;
+      }
+
+      state.storeTitle = title;
+      state.storeSubtitle = subtitle;
+      state.holderLabel = holderLabel || "寶貝專屬 VIP 甜蜜加分卡";
+      state.maxPoints = maxP;
+      state.maxPenalty = maxPen;
+      state.conditions = conds.length > 0 ? conds : DEFAULT_DATA.conditions;
+      state.penalties = pens.length > 0 ? pens : DEFAULT_DATA.penalties;
+      state.rewards = rews.length > 0 ? rews : DEFAULT_DATA.rewards;
+      
+      state.adminPin = newPin;
+      localStorage.setItem('stamp_card_pin', newPin);
+
+      if (state.currentPoints > state.maxPoints) state.currentPoints = state.maxPoints;
+      if (state.penaltyPoints > state.maxPenalty) state.penaltyPoints = state.maxPenalty;
+
+      saveState();
+      closeModal('cardSettingsModal');
+      renderApp();
+      alert("設定與管理密碼已成功儲存！下次登入請使用新密碼。");
+    }
+
+    // 兌換 Modal
+    function triggerRedeemModal() {
+      const select = document.getElementById('redeemSelect');
+      select.innerHTML = state.rewards.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join('');
+
+      document.getElementById('redeemCostInput').value = state.maxPoints;
+      document.getElementById('redeemNoteInput').value = '';
+
+      document.getElementById('redeemModal').classList.remove('hidden');
+      document.getElementById('redeemModal').classList.add('flex');
+    }
+
+    function processRedeem() {
+      const item = document.getElementById('redeemSelect').value;
+      const cost = parseInt(document.getElementById('redeemCostInput').value, 10);
+      const note = document.getElementById('redeemNoteInput').value.trim();
+
+      if (isNaN(cost) || cost <= 0) {
+        alert("請輸入有效的扣除加分點數！");
+        return;
+      }
+
+      if (state.currentPoints < cost) {
+        alert(`當前加分點數 (${state.currentPoints} 點) 不足扣除 ${cost} 點喔！`);
+        return;
+      }
+
+      state.currentPoints -= cost;
+
+      state.redeemLogs.unshift({
+        id: Date.now(),
+        time: getFormattedTime(),
+        item: item,
+        cost: cost,
+        note: note || "等待女朋友向男朋友履行兌換 ❤️"
+      });
+
+      state.pointLogs.unshift({
+        id: Date.now() + 1,
+        time: getFormattedTime(),
+        change: -cost,
+        result: state.currentPoints,
+        note: `兌換獎勵：${item}`
+      });
+
+      saveState();
+      closeModal('redeemModal');
+      switchLogTab('redeems');
+      renderApp();
+    }
+
+    // 重置所有資料
+    function confirmResetAll() {
+      if (confirm("確定要重置所有點數與設定嗎？所有的放閃與扣分紀錄都會清空喔！")) {
+        const savedPin = state.adminPin;
+        state = JSON.parse(JSON.stringify(DEFAULT_DATA));
+        state.adminPin = savedPin;
+        saveState();
+        renderApp();
+      }
+    }
+
+    // 輔助函式
+    function closeModal(modalId) {
+      document.getElementById(modalId).classList.add('hidden');
+      document.getElementById(modalId).classList.remove('flex');
+    }
+
+    function getFormattedTime() {
+      const now = new Date();
+      const y = now.getFullYear();
+      const m = String(now.getMonth() + 1).padStart(2, '0');
+      const d = String(now.getDate()).padStart(2, '0');
+      const hh = String(now.getHours()).padStart(2, '0');
+      const mm = String(now.getMinutes()).padStart(2, '0');
+      return `${y}/${m}/${d} ${hh}:${mm}`;
+    }
+
+    function escapeHtml(str) {
+      return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+    }
+  </script>
+
+</body>
+</html>
